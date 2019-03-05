@@ -16,6 +16,7 @@ from finance import Finance
 def main():
     f = Finance()
     print f.cal_month_cost(10000, 0.023, 12)
+    print f.cal_annual_interest_rate(100000, 36, 2777+500)
 
 
 if __name__ == '__main__':

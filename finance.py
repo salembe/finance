@@ -42,6 +42,9 @@ class Finance(object):
         :param x: 月还款额
         :return:
         """
+        if m * x < a:
+            print "输入错误"
+            return -1
         b = 0.00000001
         step = 0.00000001
         while True:
