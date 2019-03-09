@@ -68,6 +68,15 @@ class Finance(object):
 
     @classmethod
     def cal_house_income(cls, down_payment, year, year_rate, sellout_year=5, invest_year_rate=0.12):
+        """
+
+        :param down_payment: 首付
+        :param year: 贷款年限
+        :param year_rate: 贷款年利率
+        :param sellout_year: 出售年限
+        :param invest_year_rate: 个人投资年收益率
+        :return:
+        """
         house_price = down_payment / 0.3
         month_rate = year_rate / 12.0
         month = 12 * year
