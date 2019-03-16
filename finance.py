@@ -67,20 +67,21 @@ class Finance(object):
         return pow(float(_y) / _x, float(1) / _n) - 1
 
     @classmethod
-    def cal_house_income(cls, down_payment, year, year_rate, sellout_year=5, odds=2):
+    def cal_house_income(cls, down_payment, floor, year, year_rate, sellout_year=5, odds=2):
         """
 
         :param down_payment: 首付
+        :param floor: 首付几成
         :param year: 贷款年限
         :param year_rate: 贷款年利率
         :param sellout_year: 出售年限
         :param odds: 房价在sellout_year内翻几倍
         :return:年化投资回报率
         """
-        house_price = down_payment / 0.3
+        house_price = down_payment / floor
         month_rate = year_rate / 12.0
-        month = 12 * year
-        loan = house_price * 0.7
+        month = 12 * year  # 总房贷期数
+        loan = house_price * (1 - floor)
         month_cost = Finance.cal_month_cost(loan, month_rate, month)
 
         invest_year_rate = 0.0001
@@ -91,13 +92,16 @@ class Finance(object):
                 month_count = i + 1
                 benefit_month = sellout_year * 12 - month_count
                 month_annual_cost = month_cost * pow(base, benefit_month)
+                if month == i:
+                    break
                 all_month_cost.append(month_annual_cost)
-            all_month_cost.reverse()
-            annual_down_payment = down_payment * pow(1 + invest_year_rate, sellout_year)
-            annual_cost = annual_down_payment + sum(all_month_cost)
-            left_debt = (house_price * 0.7 / year) * (year - sellout_year)
+            all_month_cost.reverse()  # 月还款收益
+            annual_down_payment = down_payment * pow(1 + invest_year_rate, sellout_year)  # 首付收益
+            annual_cost = annual_down_payment + sum(all_month_cost)  # 总收益=首付收益+月还款收益
 
-            if (annual_cost + left_debt * 1.01) - (house_price * odds - left_debt) < 0:
+            left_debt = float(loan / year) * (year - sellout_year) if year > sellout_year else 0
+
+            if (annual_cost + left_debt * 1.01) - house_price * odds < 0:
                 invest_year_rate += 0.0001
             else:
                 break
