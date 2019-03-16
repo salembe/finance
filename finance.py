@@ -67,38 +67,38 @@ class Finance(object):
         return pow(float(_y) / _x, float(1) / _n) - 1
 
     @classmethod
-    def cal_house_income(cls, down_payment, year, year_rate, sellout_year=5, invest_year_rate=0.12):
+    def cal_house_income(cls, down_payment, year, year_rate, sellout_year=5, odds=2):
         """
 
         :param down_payment: 首付
         :param year: 贷款年限
         :param year_rate: 贷款年利率
         :param sellout_year: 出售年限
-        :param invest_year_rate: 个人投资年收益率
-        :return:
+        :param odds: 房价在sellout_year内翻几倍
+        :return:年化投资回报率
         """
         house_price = down_payment / 0.3
         month_rate = year_rate / 12.0
         month = 12 * year
         loan = house_price * 0.7
         month_cost = Finance.cal_month_cost(loan, month_rate, month)
-        print 'month_cost=', month_cost
 
-        all_month_cost = []
+        invest_year_rate = 0.0001
+        while True:
+            all_month_cost = []
+            base = 1.0 + (invest_year_rate / 12.0)
+            for i in range(sellout_year * 12):
+                month_count = i + 1
+                benefit_month = sellout_year * 12 - month_count
+                month_annual_cost = month_cost * pow(base, benefit_month)
+                all_month_cost.append(month_annual_cost)
+            all_month_cost.reverse()
+            annual_down_payment = down_payment * pow(1 + invest_year_rate, sellout_year)
+            annual_cost = annual_down_payment + sum(all_month_cost)
+            left_debt = (house_price * 0.7 / year) * (year - sellout_year)
 
-        base = 1.0 + (invest_year_rate / 12.0)
-        for i in range(sellout_year * 12):
-            month_count = i + 1
-            benefit_month = sellout_year * 12 - month_count
-            month_annual_cost = month_cost * pow(base, benefit_month)
-            all_month_cost.append(month_annual_cost)
-        all_month_cost.reverse()
-        for i, cost in enumerate(all_month_cost):
-            print i, cost
-        annual_down_payment = down_payment * pow(1 + invest_year_rate, sellout_year)
-        print annual_down_payment
-        annual_cost = annual_down_payment + sum(all_month_cost)
-        left_debt = (house_price * 0.7 / year) * (year - sellout_year)
-        print 'left_debt=', left_debt
-
-        print annual_cost + left_debt * 1.01, house_price * 2 - left_debt  # 违约金 1%
+            if (annual_cost + left_debt * 1.01) - (house_price * odds - left_debt) < 0:
+                invest_year_rate += 0.0001
+            else:
+                break
+        return invest_year_rate
