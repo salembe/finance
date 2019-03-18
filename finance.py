@@ -78,11 +78,27 @@ class Finance(object):
         :param odds: 房价在sellout_year内翻几倍
         :return:年化投资回报率
         """
-        house_price = down_payment / floor
-        month_rate = year_rate / 12.0
+
         month = 12 * year  # 总房贷期数
+        house_price = down_payment / floor
         loan = house_price * (1 - floor)
-        month_cost = Finance.cal_month_cost(loan, month_rate, month)
+
+        def get_month_cost():
+            if isinstance(year_rate, (int, float)):
+                month_rate = year_rate / 12.0
+                return [Finance.cal_month_cost(loan, month_rate, month)] * 12 * year
+            elif isinstance(year_rate, list):
+                _year_rate = []
+                if len(year_rate) < year:
+                    _year_rate = [year_rate[-1] for _ in range(year - len(year_rate))]
+                year_rate.extend(_year_rate)
+                _month_cost = []
+                for y in year_rate:
+                    month_rate = y / 12.0
+                    _month_cost.extend([Finance.cal_month_cost(loan, month_rate, month)] * 12)
+                return _month_cost
+
+        month_cost = get_month_cost()
 
         invest_year_rate = 0.0001
         while True:
@@ -91,7 +107,7 @@ class Finance(object):
             for i in range(sellout_year * 12):
                 month_count = i + 1
                 benefit_month = sellout_year * 12 - month_count
-                month_annual_cost = month_cost * pow(base, benefit_month)
+                month_annual_cost = month_cost[i] * pow(base, benefit_month)
                 if month == i:
                     break
                 all_month_cost.append(month_annual_cost)
