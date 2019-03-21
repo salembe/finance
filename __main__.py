@@ -21,7 +21,9 @@ def main():
     rates = [5.537, 5.537, 4.9, 4.165, 5.6, 6.15, 6.55, 6.8, 7.05, 6.14, 6.14]
     rates = [x / 100.0 for x in rates]
     print len(years), len(rates)
-    print Finance.cal_house_income(10000, 0.3, 20, year_rate=rates, sellout_year=5, odds=2)
+    print Finance.cal_house_income(10000, 0.3, 20, year_rate=0.06, sellout_year=10, odds=2)
+
+    print Finance.cal_increase([2, 1.1, 1, 0.5])
 
 
 if __name__ == '__main__':

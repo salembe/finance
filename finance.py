@@ -122,3 +122,19 @@ class Finance(object):
             else:
                 break
         return invest_year_rate
+
+    @classmethod
+    def cal_increase(cls, data_list):
+        """
+
+        :param data_list:
+        :return:
+        """
+        res = [0.0] * len(data_list)
+        for i, data in enumerate(data_list):
+            if i == len(data_list) - 1:
+                break
+            res[i] = float(data_list[i] - data_list[i + 1]) / float(data_list[i + 1])
+
+        compound_rate = cls.cal_compound_rate(data_list[-1], data_list[0], len(data_list) - 1)
+        return compound_rate, res
