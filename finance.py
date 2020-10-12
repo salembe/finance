@@ -17,6 +17,11 @@ X = A*B*pow(1+B,m) / (pow(1+B,m)-1)
 p = pow(float(_y) / _x, float(1) / _n) - 1
 """
 
+import pandas as pd
+
+pd.set_option('display.max_rows', 500)  # 打印最大行数
+pd.set_option('display.max_columns', 500)  # 打印最大列数
+
 
 class Finance(object):
     def __init__(self):
@@ -43,7 +48,7 @@ class Finance(object):
         :return:
         """
         if m * x < a:
-            print "输入错误"
+            print("输入错误")
             return -1
         b = 0.00000001
         step = 0.00000001
@@ -79,45 +84,96 @@ class Finance(object):
         :return:年化投资回报率
         """
 
-        month = 12 * year  # 总房贷期数
-        house_price = down_payment / floor
-        loan = house_price * (1 - floor)
+        house_price = down_payment / floor  # 房子总价
+        loan = house_price * (1 - floor)  # 房屋总贷款
 
-        def get_month_cost():
-            if isinstance(year_rate, (int, float)):
-                month_rate = year_rate / 12.0
-                return [Finance.cal_month_cost(loan, month_rate, month)] * 12 * year
-            elif isinstance(year_rate, list):
-                _year_rate = []
-                if len(year_rate) < year:
-                    _year_rate = [year_rate[-1] for _ in range(year - len(year_rate))]
-                year_rate.extend(_year_rate)
-                _month_cost = []
-                for y in year_rate:
-                    month_rate = y / 12.0
-                    _month_cost.extend([Finance.cal_month_cost(loan, month_rate, month)] * 12)
-                return _month_cost
+        def RepaymentCalculator(Loans, Year, YearRate, Type="等额本息"):
+            """
+            Loans:贷款总额
+            Year: 贷款期限，单位年
+            YearRate:贷款年利率
+            Type: 还款方式，"等额本金"or"等额本息"
+            """
+            Month = Year * 12  # 贷款总月数
+            MonthRate = YearRate / 12
+            if (Type == "等额本息"):
+                # 先求每个月固定还款额
+                FixedPayment = (Loans * MonthRate * ((1 + MonthRate) ** Month)) / (
+                        (1 + MonthRate) ** Month - 1)
+            elif (Type == "等额本金"):
+                FixedPayment = Loans / Month
 
-        month_cost = get_month_cost()
+            repayMonthIndex = []
+            repayMonthPrincipal = []
+            repayMonthInterest = []
+            unpayPrincipal = []
+            # 剩余本金
+            UnpaidPrincipal = Loans
+            if (Type == "等额本息"):
+                for i in range(Month):
+                    # 本月代还本金
+                    unpayPrincipal.append(UnpaidPrincipal)
+                    repayMonthIndex.append(i + 1)
+                    # 先计算当月利息
+                    thisMonthInterest = UnpaidPrincipal * MonthRate
+                    repayMonthInterest.append(thisMonthInterest)
+                    # 再计算当月本金
+                    thisMonthPrincipal = FixedPayment - thisMonthInterest
+                    repayMonthPrincipal.append(thisMonthPrincipal)
+                    # 最后更新代还本金
+                    UnpaidPrincipal = UnpaidPrincipal - thisMonthPrincipal
+            elif (Type == "等额本金"):
+                for i in range(Month):
+                    # 本月代还本金
+                    unpayPrincipal.append(UnpaidPrincipal)
+                    repayMonthIndex.append(i + 1)
+                    # 先计算当月利息
+                    thisMonthInterest = UnpaidPrincipal * MonthRate
+                    repayMonthInterest.append(thisMonthInterest)
+                    # 再计算当月本金,等额本金不变哦
+                    thisMonthPrincipal = FixedPayment
+                    repayMonthPrincipal.append(thisMonthPrincipal)
+                    # 最后更新代还本金
+                    UnpaidPrincipal = UnpaidPrincipal - thisMonthPrincipal
+            # 生成dataframe
+            res = pd.DataFrame({
+                "还款期数": repayMonthIndex,
+                "未还本金": unpayPrincipal,
+                "还款本金": repayMonthPrincipal,
+                "还款利息": repayMonthInterest
+            })
+            res["还款总额"] = res["还款本金"] + res["还款利息"]
+            # 调整小数位数
+            res = res.round(2)
+            return res
+
+        df = RepaymentCalculator(Loans=loan, Year=year, YearRate=year_rate, Type="等额本息")
+        month_cost = float(df.head()['还款总额'].iloc[0])  # 月供
+
+        # 已还
+        paid_month = [df['还款本金'][i] for i in range(sellout_year * 12)]
+
+        print('month_cost=', month_cost)
+        print('paid_month=', paid_month)
 
         invest_year_rate = 0.0001
+
         while True:
             all_month_cost = []
             base = 1.0 + (invest_year_rate / 12.0)
             for i in range(sellout_year * 12):
                 month_count = i + 1
-                benefit_month = sellout_year * 12 - month_count
-                month_annual_cost = month_cost[i] * pow(base, benefit_month)
-                if month == i:
-                    break
+                benefit_year = (sellout_year * 12 - month_count) / 12.0
+                month_annual_cost = month_cost * pow(base, benefit_year)
                 all_month_cost.append(month_annual_cost)
-            all_month_cost.reverse()  # 月还款收益
+            all_month_cost.reverse()  # 月贷款+投资收益率
+
             annual_down_payment = down_payment * pow(1 + invest_year_rate, sellout_year)  # 首付收益
             annual_cost = annual_down_payment + sum(all_month_cost)  # 总收益=首付收益+月还款收益
 
-            left_debt = float(loan / year) * (year - sellout_year) if year > sellout_year else 0
+            left_debt = house_price - sum(paid_month)
 
-            if (annual_cost + left_debt * 1.01) - house_price * odds < 0:
+            if (annual_cost + left_debt) - house_price * odds <= 0:
                 invest_year_rate += 0.0001
             else:
                 break
