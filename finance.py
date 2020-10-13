@@ -85,7 +85,7 @@ class Finance(object):
         """
 
         house_price = down_payment / floor  # 房子总价
-        loan = house_price * (1 - floor)  # 房屋总贷款
+        loan = house_price * (1 - floor)  # 房屋总贷款额度
 
         def RepaymentCalculator(Loans, Year, YearRate, Type="等额本息"):
             """
@@ -160,7 +160,7 @@ class Finance(object):
 
         while True:
             all_month_cost = []
-            base = 1.0 + (invest_year_rate / 12.0)
+            base = 1.0 + invest_year_rate
             for i in range(sellout_year * 12):
                 month_count = i + 1
                 benefit_year = (sellout_year * 12 - month_count) / 12.0
@@ -168,7 +168,7 @@ class Finance(object):
                 all_month_cost.append(month_annual_cost)
             all_month_cost.reverse()  # 月贷款+投资收益率
 
-            annual_down_payment = down_payment * pow(1 + invest_year_rate, sellout_year)  # 首付收益
+            annual_down_payment = down_payment * pow(base, sellout_year)  # 首付收益
             annual_cost = annual_down_payment + sum(all_month_cost)  # 总收益=首付收益+月还款收益
 
             left_debt = house_price - sum(paid_month)
@@ -176,6 +176,11 @@ class Finance(object):
             if (annual_cost + left_debt) - house_price * odds <= 0:
                 invest_year_rate += 0.0001
             else:
+                print("已支付本金：", annual_cost)
+                print("剩余本金：", left_debt)
+                print("房屋总价：", house_price * odds)
+                print("支出：", annual_cost + left_debt)
+                print("收入：", house_price * odds)
                 break
         return invest_year_rate
 
