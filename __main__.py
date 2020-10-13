@@ -18,8 +18,8 @@ def main():
                                    floor=0.3,
                                    year=30,
                                    year_rate=0.0515,
-                                   sellout_year=5,
-                                   odds=1.6) * 100)
+                                   sellout_year=10,
+                                   odds=2.4) * 100)
 
 
 if __name__ == '__main__':

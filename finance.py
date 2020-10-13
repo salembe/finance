@@ -150,11 +150,9 @@ class Finance(object):
         df = RepaymentCalculator(Loans=loan, Year=year, YearRate=year_rate, Type="等额本息")
         month_cost = float(df.head()['还款总额'].iloc[0])  # 月供
 
-        # 已还
-        paid_month = [df['还款本金'][i] for i in range(sellout_year * 12)]
-
         print('month_cost=', month_cost)
-        print('paid_month=', paid_month)
+        print('未还本金=', df['未还本金'][sellout_year * 12])
+        # print('paid_month=', paid_month)
 
         invest_year_rate = 0.0001
 
@@ -171,16 +169,17 @@ class Finance(object):
             annual_down_payment = down_payment * pow(base, sellout_year)  # 首付收益
             annual_cost = annual_down_payment + sum(all_month_cost)  # 总收益=首付收益+月还款收益
 
-            left_debt = house_price - sum(paid_month)
+            left_debt = float(df['未还本金'][sellout_year * 12])
 
             if (annual_cost + left_debt) - house_price * odds <= 0:
                 invest_year_rate += 0.0001
             else:
                 print("已支付本金：", annual_cost)
-                print("剩余本金：", left_debt)
+                print("剩余本金：", float(df['未还本金'][sellout_year * 12]))
                 print("房屋总价：", house_price * odds)
                 print("支出：", annual_cost + left_debt)
                 print("收入：", house_price * odds)
+                # print(df.head())
                 break
         return invest_year_rate
 
