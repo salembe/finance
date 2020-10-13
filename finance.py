@@ -150,9 +150,7 @@ class Finance(object):
         df = RepaymentCalculator(Loans=loan, Year=year, YearRate=year_rate, Type="等额本息")
         month_cost = float(df.head()['还款总额'].iloc[0])  # 月供
 
-        print('month_cost=', month_cost)
-        print('未还本金=', df['未还本金'][sellout_year * 12])
-        # print('paid_month=', paid_month)
+        print('月供：', month_cost)
 
         invest_year_rate = 0.0001
 
