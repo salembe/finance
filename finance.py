@@ -152,7 +152,20 @@ class Finance(object):
 
         print('月供：', month_cost)
 
-        invest_year_rate = 0.0001
+        invest_year_rate = 0.000001
+        step = 0.000001
+
+        # 计算盈亏
+
+        def cal_win():
+            win_money = []
+            for _ in range(sellout_year * 12):
+                _rate = (sellout_year * 12 - (_ + 1)) / 12.0
+                win_money.append(month_cost * pow(1 + year_rate, _rate))
+            win_money = sum(win_money) + down_payment * pow(1 + year_rate, sellout_year)
+            return win_money < (down_payment + month_cost * sellout_year * 12) * odds
+
+        win = cal_win()
 
         while True:
             all_month_cost = []
@@ -169,12 +182,17 @@ class Finance(object):
 
             left_debt = float(df['未还本金'][sellout_year * 12])
 
-            if (annual_cost + left_debt) - house_price * odds <= 0:
-                invest_year_rate += 0.0001
+            if abs((annual_cost + left_debt) - house_price * odds) >= 1000:
+                if win:
+                    invest_year_rate += step
+                else:
+                    invest_year_rate -= step
             else:
+                # print(abs((annual_cost + left_debt) - house_price * odds))
                 print("已支付本金：", annual_cost)
                 print("剩余本金：", float(df['未还本金'][sellout_year * 12]))
-                print("房屋总价：", house_price * odds)
+                print("房屋总价：", house_price)
+                print("卖出时房屋总价：", house_price * odds)
                 print("支出：", annual_cost + left_debt)
                 print("收入：", house_price * odds)
                 # print(df.head())
