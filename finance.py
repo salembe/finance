@@ -167,6 +167,8 @@ class Finance(object):
 
         win = cal_win()
 
+        first = house_price * odds
+
         while True:
             all_month_cost = []
             base = 1.0 + invest_year_rate
@@ -182,7 +184,15 @@ class Finance(object):
 
             left_debt = float(df['未还本金'][sellout_year * 12])
 
-            if abs((annual_cost + left_debt) - house_price * odds) >= 1000:
+            gap = abs((annual_cost + left_debt) - house_price * odds)
+
+            if first > gap:
+                first = gap
+            else:
+                print('gap=', gap)
+                gap = 0
+
+            if gap >= 1000:
                 if win:
                     invest_year_rate += step
                 else:
