@@ -17,10 +17,8 @@ def main():
                                           start_date=start_date, end_date=end_date, frequency=frequency)
         data_list = []
         while (rs.error_code == '0') & rs.next():
-            # 获取一条记录，将记录合并在一起
             data_list.append(rs.get_row_data())
-        result = pd.DataFrame(data_list, columns=rs.fields)
-        return result
+        return pd.DataFrame(data_list, columns=rs.fields)
 
     sh_r = get_result(sh)
     sz_r = get_result(sh)
@@ -28,7 +26,7 @@ def main():
     result['amount_x'] = result['amount_x'].astype('float64')
     result['amount_y'] = result['amount_y'].astype('float64')
     result['sum_amount'] = result['amount_x'] + result['amount_y']
-    result = result[result['sum_amount'] >= 10000*10000*10000]
+    result = result[result['sum_amount'] >= 10000 * 10000 * 10000]
     pd.set_option('display.max_rows', None)
     print(result.sort_values('date'))
 
