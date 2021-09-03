@@ -34,4 +34,4 @@ for i, item in enumerate(lls):
 
 # print cal_fina(1, 10, 10)
 rs.reverse()
-print rs
+print(rs)
