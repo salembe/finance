@@ -21,7 +21,7 @@ def main():
         return pd.DataFrame(data_list, columns=rs.fields)
 
     sh_r = get_result(sh)
-    sz_r = get_result(sh)
+    sz_r = get_result(sz)
     result = pd.merge(sh_r, sz_r, on='date')
     result['amount_x'] = result['amount_x'].astype('float64')
     result['amount_y'] = result['amount_y'].astype('float64')
