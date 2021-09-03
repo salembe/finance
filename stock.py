@@ -4,7 +4,7 @@ import datetime
 
 
 def main():
-    lg = bs.login()
+    bs.login()
     sh = "sh.000001"
     sz = 'sz.399001'
     metrics = "date,code,open,high,low,close,preclose,volume,amount,pctChg"
@@ -24,11 +24,12 @@ def main():
     sh_r = get_result(sh)
     sz_r = get_result(sz)
     result = pd.merge(sh_r, sz_r, on='date')
-    result['amount_x'] = result['amount_x'].astype('float64')
-    result['amount_y'] = result['amount_y'].astype('float64')
+    result['amount_x'] = (result['amount_x'].astype('float64') / (10000 * 10000)).astype(int)
+    result['amount_y'] = (result['amount_y'].astype('float64') / (10000 * 10000)).astype(int)
     result['sum_amount'] = result['amount_x'] + result['amount_y']
-    result = result[result['sum_amount'] >= 10000 * 10000 * 10000]
+    result = result[result['sum_amount'] < 3000]
     pd.set_option('display.max_rows', None)
+    # pd.set_option('display.max_columns', None)
     print(result.sort_values('date'))
 
     # 登出系统
