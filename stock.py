@@ -1,5 +1,6 @@
 import baostock as bs
 import pandas as pd
+import datetime
 
 
 def main():
@@ -8,7 +9,7 @@ def main():
     sz = 'sz.399001'
     metrics = "date,code,open,high,low,close,preclose,volume,amount,pctChg"
     start_date = '2014-01-01'
-    end_date = '2021-09-03'
+    end_date = datetime.datetime.now().strftime('%Y-%m-%d')
     frequency = 'd'
 
     def get_result(t):
