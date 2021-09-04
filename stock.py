@@ -1,6 +1,8 @@
 import baostock as bs
 import pandas as pd
 import datetime
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 def main():
@@ -23,14 +25,21 @@ def main():
 
     sh_r = get_result(sh)
     sz_r = get_result(sz)
+    print(sh_r)
     result = pd.merge(sh_r, sz_r, on='date')
     result['amount_x'] = (result['amount_x'].astype('float64') / (10000 * 10000)).astype(int)
     result['amount_y'] = (result['amount_y'].astype('float64') / (10000 * 10000)).astype(int)
     result['sum_amount'] = result['amount_x'] + result['amount_y']
-    result = result[result['sum_amount'] < 3000]
+
+    # 3000亿成交
+    result = result[result['sum_amount'] >= 10000]
     pd.set_option('display.max_rows', None)
-    # pd.set_option('display.max_columns', None)
     print(result.sort_values('date'))
+
+    # 资金趋势
+    # sns.barplot("date", "sum_amount", palette="RdBu_r", data=result)
+    # plt.xticks(rotation=90)
+    # plt.show()
 
     # 登出系统
     bs.logout()
