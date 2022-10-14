@@ -10,7 +10,7 @@ def main():
     sh = "sh.000001"
     sz = 'sz.399001'
     metrics = "date,code,open,high,low,close,preclose,volume,amount,pctChg"
-    start_date = '2014-01-01'
+    start_date = '2018-01-01'
     end_date = datetime.datetime.now().strftime('%Y-%m-%d')
     frequency = 'd'
 
@@ -32,14 +32,14 @@ def main():
     result['sum_amount'] = result['amount_x'] + result['amount_y']
 
     # 3000亿成交
-    result = result[result['sum_amount'] >= 10000]
+    result = result[result['sum_amount'] >= 0]
     pd.set_option('display.max_rows', None)
     print(result.sort_values('date'))
 
     # 资金趋势
-    # sns.barplot("date", "sum_amount", palette="RdBu_r", data=result)
-    # plt.xticks(rotation=90)
-    # plt.show()
+    sns.barplot("date", "sum_amount", palette="RdBu_r", data=result)
+    plt.xticks(rotation=90)
+    plt.show()
 
     # 登出系统
     bs.logout()
